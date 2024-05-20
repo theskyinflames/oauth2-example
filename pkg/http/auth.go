@@ -48,17 +48,18 @@ func AuthMiddleware(rsaPublicKey []*rsa.PublicKey) echo.MiddlewareFunc {
 				return c.Redirect(http.StatusTemporaryRedirect, "/login")
 			}
 
-			// parse the token
+			// parse the token received in the auth cookie
 			_, roles, err := parseJWT(token, rsaPublicKey)
 			if err != nil {
 				c.Logger().Errorf("Failed to parse token: %v", err)
 				return c.Redirect(http.StatusTemporaryRedirect, "/login")
 			}
 
-			// TODO: Check if the user has the required roles
+			// TODO: Check if the user has the required roles to access the resource
 			for _, role := range roles {
 				fmt.Printf("Role: %s\n", role)
 			}
+
 			_ = roles
 
 			// Return the next handler
@@ -73,22 +74,39 @@ func LoginHandler(c echo.Context) error {
 	return c.Redirect(http.StatusPermanentRedirect, url)
 }
 
-// CallbackHandler is the handler for the callback page
+// CallbackHandler is a decorator for the callback handler
 func CallbackHandler(c echo.Context) error {
 	code := c.QueryParam("code")
 	if code == "" {
 		return c.String(http.StatusBadRequest, "Code not found")
 	}
 
-	token, err := oauthConfig.Exchange(context.Background(), code)
+	iamToken, err := oauthConfig.Exchange(context.Background(), code)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Failed to exchange token: %v", err))
 	}
+	accessToken, err := convertOAuth2TokenToJWT(iamToken)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Failed to convert token: %v", err))
+	}
 
+	// Extract the roles from the token
+	roles := extractRoles(accessToken)
+
+	// Create a new token
+	newToken := NewCustomToken(accessToken, roles)
+
+	fmt.Printf("New token: %v\n", newToken.Raw)
+
+	// Set the auth cookie with the new token
 	c.SetCookie(&http.Cookie{
 		Name:  authCookieName,
-		Value: token.AccessToken,
+		Value: accessToken.Raw,
 	})
+
+	for _, role := range roles {
+		fmt.Printf("Role: %s\n", role)
+	}
 
 	return c.Redirect(http.StatusFound, "/protected")
 }

@@ -13,7 +13,7 @@ import (
 func main() {
 	rsaPublicKeys, err := httpx.GetRSAKeys()
 	if err != nil {
-		fmt.Printf("Failed to get JWK set: %v\n", err)
+		fmt.Printf("Failed to get JWKS: %v\n", err)
 		os.Exit(1)
 	}
 	fmt.Printf("Public keys: \n%#v\n", rsaPublicKeys)
