@@ -1,4 +1,4 @@
-package main
+package http
 
 import (
 	"crypto/rsa"
@@ -7,13 +7,29 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"os"
 	"strings"
 )
 
+// jwksURI is the URL of the JWK for the client the IAM server is configured with.
 const jwksURI = "http://localhost:8080/realms/test-realm/protocol/openid-connect/certs"
 
-// GetJWKSet retrieves the JWK set from the specified URL and returns a map of RSA public keys.
-func GetJWKSet(url string) (map[string]*rsa.PublicKey, error) {
+// GetRSAKeys retrieves the RSA public keys from the JWK set and returns a slice of *rsa.PublicKey.
+func GetRSAKeys() ([]*rsa.PublicKey, error) {
+	rsaPublicKeys, err := getJWKSet(jwksURI)
+	if err != nil {
+		fmt.Printf("Failed to get JWK set: %v\n", err)
+		os.Exit(1)
+	}
+	var pks []*rsa.PublicKey
+	for _, v := range rsaPublicKeys {
+		pks = append(pks, v)
+	}
+	return pks, nil
+}
+
+// getJWKSet retrieves the JWK set from the specified URL and returns a map of RSA public keys.
+func getJWKSet(url string) (map[string]*rsa.PublicKey, error) {
 	// Make the GET request
 	response, err := http.Get(url)
 	if err != nil {
