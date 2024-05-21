@@ -28,7 +28,11 @@ func TestLoginHandler(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	// Call the LoginHandler function
-	err := httpx.LoginHandler(c)
+	err := httpx.LoginHandler(httpx.OAuthConfig(
+		"test-client",
+		"EPgv2q0H2fjG1VlHfrVkk5sVQPxLVzOW",
+		"http://localhost:8080/realms/test-realm/protocol/openid-connect/auth",
+		"http://localhost:8080/realms/test-realm/protocol/openid-connect/token"))(c)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}

@@ -1,6 +1,24 @@
-# oauth2-example (WIP)
+# oauth2-example
 
 This is a simple example of protecting REST endpoints with OAuth2 IAM.
+
+# How to run it
+
+1. Start the `keycloak` container
+
+```sh
+    make run-oauth2
+```
+
+2. Create the real, the client and the user
+
+3. Edit './run.sh' script to set the right environment variables
+
+4. Run the script
+
+```sh
+    make run-api
+```
 
 # What authentication middleware does
 

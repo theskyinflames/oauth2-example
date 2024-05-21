@@ -11,15 +11,17 @@ import (
 )
 
 // OAuthConfig is the OAuth2 configuration
-var OAuthConfig = &oauth2.Config{
-	ClientID:     "test-client",
-	ClientSecret: "EPgv2q0H2fjG1VlHfrVkk5sVQPxLVzOW",
-	// RedirectURL:  "http://localhost:9000/callback",
-	// Scopes: []string{"openid", "profile", "email"},
-	Endpoint: oauth2.Endpoint{
-		AuthURL:  "http://localhost:8080/realms/test-realm/protocol/openid-connect/auth",
-		TokenURL: "http://localhost:8080/realms/test-realm/protocol/openid-connect/token",
-	},
+func OAuthConfig(clientID, ClientSecret, authURL, tokenURL string) *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     "test-client",
+		ClientSecret: "EPgv2q0H2fjG1VlHfrVkk5sVQPxLVzOW",
+		// RedirectURL:  "http://localhost:9000/callback",
+		// Scopes: []string{"openid", "profile", "email"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "http://localhost:8080/realms/test-realm/protocol/openid-connect/auth",
+			TokenURL: "http://localhost:8080/realms/test-realm/protocol/openid-connect/token",
+		},
+	}
 }
 
 const (
@@ -69,9 +71,11 @@ func AuthMiddleware(rsaPublicKey []*rsa.PublicKey) echo.MiddlewareFunc {
 type OAuthConfigExchangeFunc func(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error)
 
 // LoginHandler is the handler for the login page
-func LoginHandler(c echo.Context) error {
-	url := OAuthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
-	return c.Redirect(http.StatusPermanentRedirect, url)
+func LoginHandler(oauthConfig *oauth2.Config) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		url := oauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
+		return c.Redirect(http.StatusPermanentRedirect, url)
+	}
 }
 
 // CallbackHandler is a decorator for the callback handler

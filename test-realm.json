@@ -1,0 +1,60 @@
+{
+  "clientId": "EPgv2q0H2fjG1VlHfrVkk5sVQPxLVzOW",
+  "name": "test-client",
+  "description": "",
+  "rootUrl": "",
+  "adminUrl": "",
+  "baseUrl": "",
+  "surrogateAuthRequired": false,
+  "enabled": true,
+  "alwaysDisplayInConsole": false,
+  "clientAuthenticatorType": "client-secret",
+  "secret": "uwTbiUjV4sBQmWVhWiwAkY8My9OlMcQ2",
+  "redirectUris": [
+    "http://localhost:9000/callback"
+  ],
+  "webOrigins": [
+    "http://localhost:9000"
+  ],
+  "notBefore": 0,
+  "bearerOnly": false,
+  "consentRequired": false,
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": false,
+  "directAccessGrantsEnabled": true,
+  "serviceAccountsEnabled": false,
+  "publicClient": false,
+  "frontchannelLogout": true,
+  "protocol": "openid-connect",
+  "attributes": {
+    "oidc.ciba.grant.enabled": "false",
+    "client.secret.creation.time": "1716308604",
+    "backchannel.logout.session.required": "true",
+    "oauth2.device.authorization.grant.enabled": "false",
+    "display.on.consent.screen": "false",
+    "use.jwks.url": "true",
+    "backchannel.logout.revoke.offline.tokens": "false",
+    "jwt.credential.certificate": "MIICzzCCAbcCBgGPm/eC0jANBgkqhkiG9w0BAQsFADArMSkwJwYDVQQDDCBFUGd2MnEwSDJmakcxVmxIZnJWa2s1c1ZRUHhMVnpPVzAeFw0yNDA1MjExNjIyMjBaFw0zNDA1MjExNjI0MDBaMCsxKTAnBgNVBAMMIEVQZ3YycTBIMmZqRzFWbEhmclZrazVzVlFQeExWek9XMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgSx6lT2+nj1DV5PL6dkkcRFWelBT1kZwYbiAAX/aYA3bM5vcZGDRVPJ4XtaZGsTdGMEUF/eS6gFIFGtyvKEulcCAH3NruCreWI7f9vx6k76e0pLtlfMKgWhRVrLx5atHaW6AtEu8MKr3RPXOy11WqxWwVD1TBE41skkjJd2WtiARCIAE8hcsmekDoifq9fQ/rAIpRlTDsNctU1QkA8uv8gLG+dSJb/YUYooxptBGEOWnfyy73S+z8rbboI8HRM9WZW+cpmLMFnW9FqYLuzE6k7uetYoS/0vIXACqgSCAsSulER570AhbNPGHYKbt2w/tQKYKA0IbGYC3fVr7wAxV4wIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBs+0/dhzYSchfxR1iVe8qPg5eaurse/PMaYRo1qZz4x8kKFvMyDf7CkmrLU4pgFhSwtsK+xDJn84ZKzc40/LoYNyytXxOjz5StZ7BdhYs6TyPAcIRjat9INlu8MHtwBmrFSpiZpp81MNYJi8U87dJaFz2UGcnZ4D9bFORVCDzaKEy0kEFbgPwHlY0AHM+x+trWMw3tKnYb9BrxSyAw45hg9hRzVdOnb7AAcGdlwrWhZAeM+hIY8xhJmo7xQroCaqz64y2z7Hnfl/q37kBRA3PKYdsOqeza7vOxva3Vzh2mk0M1oaR4n22zcjva1D+pOWUCh+AlnoAo3xtLhUzHMAFH"
+  },
+  "authenticationFlowBindingOverrides": {},
+  "fullScopeAllowed": true,
+  "nodeReRegistrationTimeout": -1,
+  "defaultClientScopes": [
+    "web-origins",
+    "acr",
+    "profile",
+    "roles",
+    "email"
+  ],
+  "optionalClientScopes": [
+    "address",
+    "phone",
+    "offline_access",
+    "microprofile-jwt"
+  ],
+  "access": {
+    "view": true,
+    "configure": true,
+    "manage": true
+  }
+}
