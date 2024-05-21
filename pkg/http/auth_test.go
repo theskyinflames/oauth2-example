@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"theskyinflames/oauth2-example/pkg/fixtures"
 	httpx "theskyinflames/oauth2-example/pkg/http"
 
 	"github.com/labstack/echo/v4"
@@ -48,13 +49,19 @@ func TestCallbackHandler(t *testing.T) {
 		httpx.OAuthConfigExchangeFunc(
 			func(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
 				// Generate RSA keys pair
-				privKey, _ := rsaKeysPairFixture(t)
+				privKey, _, err := fixtures.RSAKeysPairFixture()
+				if err != nil {
+					t.Fatalf("Failed to generate RSA keys pair: %v", err)
+				}
 
 				// Generate a signed JWT token
-				accessToken := tokenFixture(t, privKey)
+				accessToken, err := fixtures.TokenFixture(privKey)
+				if err != nil {
+					t.Fatalf("Failed to generate token: %v", err)
+				}
 
 				// Generate an OAuth2 token with a JWT access token
-				oauth2Token := oauth2TokenFixture(t, accessToken)
+				oauth2Token := fixtures.OAuth2TokenFixture(accessToken)
 				return oauth2Token, nil
 			},
 		),

@@ -14,8 +14,8 @@ type Role string
 
 const rolesClaimKey = "realm_access"
 
-// ExtractRoles extracts the roles from the JWT token and returns them as a list of strings
-func ExtractRoles(token *jwt.Token) []Role {
+// extractRoles extracts the roles from the JWT token and returns them as a list of strings
+func extractRoles(token *jwt.Token) []Role {
 	// Extract the claims from the token
 	tokenRoles := token.Claims.(jwt.MapClaims)[rolesClaimKey].(map[string]interface{})["roles"].([]interface{})
 	roles := make([]Role, len(tokenRoles))
@@ -36,8 +36,8 @@ var KeyFunc = func(pk *rsa.PublicKey) jwt.Keyfunc {
 	}
 }
 
-// ParseJWT parses the JWT token and returns the token if it is valid along with the roles of the user
-func ParseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, []Role, error) {
+// parseJWT parses the JWT token and returns the token if it is valid along with the roles of the user
+func parseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, []Role, error) {
 	// Parse the token
 	var (
 		token *jwt.Token
@@ -57,7 +57,7 @@ func ParseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, 
 		return nil, nil, fmt.Errorf("token is invalid")
 	}
 
-	roles := ExtractRoles(token)
+	roles := extractRoles(token)
 
 	return token, roles, nil
 }
@@ -91,8 +91,8 @@ func NewCustomToken(token *jwt.Token, roles []Role) *jwt.Token {
 	}
 }
 
-// ConvertOAuth2TokenToJWT converts an OAuth2 token to a JWT token
-func ConvertOAuth2TokenToJWT(oauth2Token *oauth2.Token) (*jwt.Token, error) {
+// convertOAuth2TokenToJWT converts an OAuth2 token to a JWT token
+func convertOAuth2TokenToJWT(oauth2Token *oauth2.Token) (*jwt.Token, error) {
 	// Extract the access token, which we assume to be a JWT
 	accessToken := oauth2Token.AccessToken
 

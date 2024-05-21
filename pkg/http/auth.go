@@ -50,7 +50,7 @@ func AuthMiddleware(rsaPublicKey []*rsa.PublicKey) echo.MiddlewareFunc {
 			}
 
 			// parse the token received in the auth cookie
-			_, roles, err := ParseJWT(token, rsaPublicKey)
+			_, roles, err := parseJWT(token, rsaPublicKey)
 			if err != nil {
 				c.Logger().Errorf("Failed to parse token: %v", err)
 				return c.Redirect(http.StatusTemporaryRedirect, "/login")
@@ -91,13 +91,13 @@ func CallbackHandler(f OAuthConfigExchangeFunc) echo.HandlerFunc {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, fmt.Sprintf("Failed to exchange token: %v", err))
 		}
-		accessToken, err := ConvertOAuth2TokenToJWT(iamToken)
+		accessToken, err := convertOAuth2TokenToJWT(iamToken)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, fmt.Sprintf("Failed to convert token: %v", err))
 		}
 
 		// Extract the roles from the token
-		roles := ExtractRoles(accessToken)
+		roles := extractRoles(accessToken)
 
 		// Create a new token
 		newToken := NewCustomToken(accessToken, roles)
