@@ -27,6 +27,7 @@ func GetRSAKeys(f getJWKSetFunc) ([]*rsa.PublicKey, error) {
 	for _, v := range rsaPublicKeys {
 		pks = append(pks, v)
 	}
+
 	return pks, nil
 }
 
@@ -48,6 +49,7 @@ func GetJWKSet(url string) (map[string]*rsa.PublicKey, error) {
 			X5C []string `json:"x5c"`
 		} `json:"keys"`
 	}
+
 	decoder := json.NewDecoder(response.Body)
 	if err := decoder.Decode(&jwkSet); err != nil {
 		return nil, fmt.Errorf("Error decoding JSON: %v", err)
