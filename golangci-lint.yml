@@ -1,0 +1,34 @@
+linters-settings:
+  govet:
+    check-shadowing: true
+  golint:
+    min-confidence: 0.8
+  gocyclo:
+    min-complexity: 10
+  maligned:
+    suggest-new: true
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 3
+  misspell:
+    locale: US
+  lll:
+    max-line-length: 120
+  
+
+linters:
+  enable:
+    - govet
+    - golint
+    - gocyclo
+    - maligned
+    - dupl
+    - goconst
+    - misspell
+  disable:
+    - magicNumbers
+
+run:
+  deadline: 1m
