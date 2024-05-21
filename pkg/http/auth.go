@@ -57,11 +57,7 @@ func AuthMiddleware(rsaPublicKey []*rsa.PublicKey) echo.MiddlewareFunc {
 			}
 
 			// TODO: Check if the user has the required roles to access the resource
-			for _, role := range roles {
-				fmt.Printf("Role: %s\n", role)
-			}
-
-			_ = roles
+			c.Set("roles", roles)
 
 			// Return the next handler
 			return next(c)
@@ -109,10 +105,6 @@ func CallbackHandler(f OAuthConfigExchangeFunc) echo.HandlerFunc {
 			Name:  authCookieName,
 			Value: accessToken.Raw,
 		})
-
-		for _, role := range roles {
-			fmt.Printf("Role: %s\n", role)
-		}
 
 		return c.Redirect(http.StatusFound, "/protected")
 	}

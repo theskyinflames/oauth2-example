@@ -16,7 +16,6 @@ func main() {
 		fmt.Printf("Failed to get JWKS: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Printf("Public keys: \n%#v\n", rsaPublicKeys)
 
 	e := echo.New()
 
