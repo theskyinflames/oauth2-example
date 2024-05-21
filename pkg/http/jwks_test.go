@@ -17,11 +17,11 @@ func TestDecodeBase64URL(t *testing.T) {
 
 	result, err := httpx.DecodeBase64URL(input)
 	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
+		t.Fatalf("Unexpected error: %v", err)
 	}
 
 	if result.Cmp(expectedOutput) != 0 {
-		t.Errorf("Expected %v, but got %v", expectedOutput, result)
+		t.Fatalf("Expected %v, but got %v", expectedOutput, result)
 	}
 }
 
@@ -65,27 +65,27 @@ func TestGetJWKSet(t *testing.T) {
 	// Call the function
 	keys, err := httpx.GetJWKSet(mockServer.URL)
 	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
+		t.Fatalf("Unexpected error: %v", err)
 	}
 
 	// Compare the keys
 	if len(keys) != len(expectedKeys) {
-		t.Errorf("Expected %d keys, but got %d", len(expectedKeys), len(keys))
+		t.Fatalf("Expected %d keys, but got %d", len(expectedKeys), len(keys))
 	}
 
 	for kid, expectedKey := range expectedKeys {
 		actualKey, ok := keys[kid]
 		if !ok {
-			t.Errorf("Key with kid %s not found", kid)
+			t.Fatalf("Key with kid %s not found", kid)
 			continue
 		}
 
 		if actualKey.N.Cmp(expectedKey.N) != 0 {
-			t.Errorf("Expected N value %v, but got %v", expectedKey.N, actualKey.N)
+			t.Fatalf("Expected N value %v, but got %v", expectedKey.N, actualKey.N)
 		}
 
 		if actualKey.E != expectedKey.E {
-			t.Errorf("Expected E value %v, but got %v", expectedKey.E, actualKey.E)
+			t.Fatalf("Expected E value %v, but got %v", expectedKey.E, actualKey.E)
 		}
 	}
 }
@@ -108,7 +108,7 @@ func TestGetRSAKeys(t *testing.T) {
 	// Call the function
 	keys, err := httpx.GetRSAKeys(getJWKSetFunc)
 	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
+		t.Fatalf("Unexpected error: %v", err)
 	}
 
 	// Compare the keys
@@ -124,7 +124,7 @@ func TestGetRSAKeys(t *testing.T) {
 	}
 
 	if len(keys) != len(expectedKeys) {
-		t.Errorf("Expected %d keys, but got %d", len(expectedKeys), len(keys))
+		t.Fatalf("Expected %d keys, but got %d", len(expectedKeys), len(keys))
 	}
 
 	for _, expectedKey := range expectedKeys {
@@ -136,7 +136,7 @@ func TestGetRSAKeys(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Errorf("Key not found: %v", expectedKey)
+			t.Fatalf("Key not found: %v", expectedKey)
 		}
 	}
 }

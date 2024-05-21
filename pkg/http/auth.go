@@ -10,7 +10,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var oauthConfig = &oauth2.Config{
+// OAuthConfig is the OAuth2 configuration
+var OAuthConfig = &oauth2.Config{
 	ClientID:     "test-client",
 	ClientSecret: "EPgv2q0H2fjG1VlHfrVkk5sVQPxLVzOW",
 	// RedirectURL:  "http://localhost:9000/callback",
@@ -49,7 +50,7 @@ func AuthMiddleware(rsaPublicKey []*rsa.PublicKey) echo.MiddlewareFunc {
 			}
 
 			// parse the token received in the auth cookie
-			_, roles, err := parseJWT(token, rsaPublicKey)
+			_, roles, err := ParseJWT(token, rsaPublicKey)
 			if err != nil {
 				c.Logger().Errorf("Failed to parse token: %v", err)
 				return c.Redirect(http.StatusTemporaryRedirect, "/login")
@@ -68,45 +69,51 @@ func AuthMiddleware(rsaPublicKey []*rsa.PublicKey) echo.MiddlewareFunc {
 	}
 }
 
+// OAuthConfigExchangeFunc is a function to exchange the OAuth2 code for a token
+type OAuthConfigExchangeFunc func(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error)
+
 // LoginHandler is the handler for the login page
 func LoginHandler(c echo.Context) error {
-	url := oauthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
+	url := OAuthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
 	return c.Redirect(http.StatusPermanentRedirect, url)
 }
 
 // CallbackHandler is a decorator for the callback handler
-func CallbackHandler(c echo.Context) error {
-	code := c.QueryParam("code")
-	if code == "" {
-		return c.String(http.StatusBadRequest, "Code not found")
+func CallbackHandler(f OAuthConfigExchangeFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		code := c.QueryParam("code")
+		if code == "" {
+			return c.String(http.StatusBadRequest, "Code not found")
+		}
+
+		// iamToken, err := oauthConfig.Exchange(context.Background(), code)
+		iamToken, err := f(context.Background(), code)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("Failed to exchange token: %v", err))
+		}
+		accessToken, err := ConvertOAuth2TokenToJWT(iamToken)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("Failed to convert token: %v", err))
+		}
+
+		// Extract the roles from the token
+		roles := ExtractRoles(accessToken)
+
+		// Create a new token
+		newToken := NewCustomToken(accessToken, roles)
+
+		fmt.Printf("New token: %v\n", newToken.Raw)
+
+		// Set the auth cookie with the new token
+		c.SetCookie(&http.Cookie{
+			Name:  authCookieName,
+			Value: accessToken.Raw,
+		})
+
+		for _, role := range roles {
+			fmt.Printf("Role: %s\n", role)
+		}
+
+		return c.Redirect(http.StatusFound, "/protected")
 	}
-
-	iamToken, err := oauthConfig.Exchange(context.Background(), code)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Failed to exchange token: %v", err))
-	}
-	accessToken, err := convertOAuth2TokenToJWT(iamToken)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("Failed to convert token: %v", err))
-	}
-
-	// Extract the roles from the token
-	roles := extractRoles(accessToken)
-
-	// Create a new token
-	newToken := NewCustomToken(accessToken, roles)
-
-	fmt.Printf("New token: %v\n", newToken.Raw)
-
-	// Set the auth cookie with the new token
-	c.SetCookie(&http.Cookie{
-		Name:  authCookieName,
-		Value: accessToken.Raw,
-	})
-
-	for _, role := range roles {
-		fmt.Printf("Role: %s\n", role)
-	}
-
-	return c.Redirect(http.StatusFound, "/protected")
 }

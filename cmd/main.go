@@ -28,7 +28,7 @@ func main() {
 	// Routes
 	e.GET("/protected", httpx.ProtectedHandler)
 	e.GET("/login", httpx.LoginHandler)
-	e.GET("/callback", httpx.CallbackHandler)
+	e.GET("/callback", httpx.CallbackHandler(httpx.OAuthConfig.Exchange))
 
 	// Start server
 	e.Logger.Fatal(e.Start(":9000"))

@@ -14,8 +14,8 @@ type Role string
 
 const rolesClaimKey = "realm_access"
 
-// extractRoles extracts the roles from the JWT token and returns them as a list of strings
-func extractRoles(token *jwt.Token) []Role {
+// ExtractRoles extracts the roles from the JWT token and returns them as a list of strings
+func ExtractRoles(token *jwt.Token) []Role {
 	// Extract the claims from the token
 	tokenRoles := token.Claims.(jwt.MapClaims)[rolesClaimKey].(map[string]interface{})["roles"].([]interface{})
 	roles := make([]Role, len(tokenRoles))
@@ -25,21 +25,26 @@ func extractRoles(token *jwt.Token) []Role {
 	return roles
 }
 
-// parseJWT parses the JWT token and returns the token if it is valid along with the roles of the user
-func parseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, []Role, error) {
+// KeyFunc returns a jwt.Keyfunc that can be used to parse the JWT token
+var KeyFunc = func(pk *rsa.PublicKey) jwt.Keyfunc {
+	return func(token *jwt.Token) (interface{}, error) {
+		// Make sure that the token's algorithm corresponds to RS256
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return pk, nil
+	}
+}
+
+// ParseJWT parses the JWT token and returns the token if it is valid along with the roles of the user
+func ParseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, []Role, error) {
 	// Parse the token
 	var (
 		token *jwt.Token
 		err   error
 	)
 	for _, pk := range rsaPublicKey {
-		token, err = jwt.Parse(receivedToken, func(token *jwt.Token) (interface{}, error) {
-			// Make sure that the token's algorithm corresponds to RS256
-			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return pk, nil
-		})
+		token, err = jwt.Parse(receivedToken, KeyFunc(pk))
 		if err == nil {
 			break
 		}
@@ -52,7 +57,7 @@ func parseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, 
 		return nil, nil, fmt.Errorf("token is invalid")
 	}
 
-	roles := extractRoles(token)
+	roles := ExtractRoles(token)
 
 	return token, roles, nil
 }
@@ -86,7 +91,8 @@ func NewCustomToken(token *jwt.Token, roles []Role) *jwt.Token {
 	}
 }
 
-func convertOAuth2TokenToJWT(oauth2Token *oauth2.Token) (*jwt.Token, error) {
+// ConvertOAuth2TokenToJWT converts an OAuth2 token to a JWT token
+func ConvertOAuth2TokenToJWT(oauth2Token *oauth2.Token) (*jwt.Token, error) {
 	// Extract the access token, which we assume to be a JWT
 	accessToken := oauth2Token.AccessToken
 
