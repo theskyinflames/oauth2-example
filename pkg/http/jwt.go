@@ -9,6 +9,22 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// Role represents the role of a user
+type Role string
+
+const rolesClaimKey = "realm_access"
+
+// extractRoles extracts the roles from the JWT token and returns them as a list of strings
+func extractRoles(token *jwt.Token) []Role {
+	// Extract the claims from the token
+	tokenRoles := token.Claims.(jwt.MapClaims)[rolesClaimKey].(map[string]interface{})["roles"].([]interface{})
+	roles := make([]Role, len(tokenRoles))
+	for i, v := range tokenRoles {
+		roles[i] = Role(fmt.Sprintf("%s", v))
+	}
+	return roles
+}
+
 // parseJWT parses the JWT token and returns the token if it is valid along with the roles of the user
 func parseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, []Role, error) {
 	// Parse the token
@@ -39,22 +55,6 @@ func parseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, 
 	roles := extractRoles(token)
 
 	return token, roles, nil
-}
-
-// Role represents the role of a user
-type Role string
-
-const rolesClaimKey = "realm_access"
-
-// extractRoles extracts the roles from the JWT token and returns them as a list of strings
-func extractRoles(token *jwt.Token) []Role {
-	// Extract the claims from the token
-	tokenRoles := token.Claims.(jwt.MapClaims)[rolesClaimKey].(map[string]interface{})["roles"].([]interface{})
-	roles := make([]Role, len(tokenRoles))
-	for i, v := range tokenRoles {
-		roles[i] = Role(fmt.Sprintf("%s", v))
-	}
-	return roles
 }
 
 var _ jwt.Claims = &CustomToken{}

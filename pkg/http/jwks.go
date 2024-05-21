@@ -14,9 +14,11 @@ import (
 // jwksURI is the URL of the JWK for the client the IAM server is configured with.
 const jwksURI = "http://localhost:8080/realms/test-realm/protocol/openid-connect/certs"
 
+type getJWKSetFunc func(url string) (map[string]*rsa.PublicKey, error)
+
 // GetRSAKeys retrieves the RSA public keys from the JWK set and returns a slice of *rsa.PublicKey.
-func GetRSAKeys() ([]*rsa.PublicKey, error) {
-	rsaPublicKeys, err := getJWKSet(jwksURI)
+func GetRSAKeys(f getJWKSetFunc) ([]*rsa.PublicKey, error) {
+	rsaPublicKeys, err := f(jwksURI)
 	if err != nil {
 		fmt.Printf("Failed to get JWK set: %v\n", err)
 		os.Exit(1)
@@ -28,8 +30,8 @@ func GetRSAKeys() ([]*rsa.PublicKey, error) {
 	return pks, nil
 }
 
-// getJWKSet retrieves the JWK set from the specified URL and returns a map of RSA public keys.
-func getJWKSet(url string) (map[string]*rsa.PublicKey, error) {
+// GetJWKSet retrieves the JWK set from the specified URL and returns a map of RSA public keys.
+func GetJWKSet(url string) (map[string]*rsa.PublicKey, error) {
 	// Make the GET request
 	response, err := http.Get(url)
 	if err != nil {
@@ -57,12 +59,12 @@ func getJWKSet(url string) (map[string]*rsa.PublicKey, error) {
 	// Iterate through each key in the JWK set
 	for _, key := range jwkSet.Keys {
 		// Decode base64url-encoded modulus (N) and exponent (E)
-		modulus, err := decodeBase64URL(key.N)
+		modulus, err := DecodeBase64URL(key.N)
 		if err != nil {
 			return nil, fmt.Errorf("Error decoding modulus: %v", err)
 		}
 
-		exponent, err := decodeBase64URL(key.E)
+		exponent, err := DecodeBase64URL(key.E)
 		if err != nil {
 			return nil, fmt.Errorf("Error decoding exponent: %v", err)
 		}
@@ -80,8 +82,8 @@ func getJWKSet(url string) (map[string]*rsa.PublicKey, error) {
 	return jwkMap, nil
 }
 
-// decodeBase64URL decodes a base64url-encoded string and returns a big.Int
-func decodeBase64URL(input string) (*big.Int, error) {
+// DecodeBase64URL decodes a base64url-encoded string and returns a big.Int
+func DecodeBase64URL(input string) (*big.Int, error) {
 	// Convert base64url to base64
 	base64Str := strings.ReplaceAll(input, "-", "+")
 	base64Str = strings.ReplaceAll(base64Str, "_", "/")
