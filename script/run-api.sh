@@ -2,7 +2,7 @@
 
 # Set environment variables
 export CLIENT_ID='test-client'
-export CLIENT_SECRET='uwTbiUjV4sBQmWVhWiwAkY8My9OlMcQ2'
+export CLIENT_SECRET='RRrNlBzKzEbpYSCUbSBkwzkiYfcCSSqS'
 export AUTH_URL='http://localhost:8080/realms/test-realm/protocol/openid-connect/auth'
 export TOKEN_URL='http://localhost:8080/realms/test-realm/protocol/openid-connect/token'
 

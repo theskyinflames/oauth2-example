@@ -1,24 +1,41 @@
-# oauth2-example
+# oauth2-example (WIP)
 
-This is a simple example of protecting REST endpoints with OAuth2 IAM.
+This is a simple example of protecting REST endpoints using an identity manager and OpenID as authentication protocol. As identity manager, I use [Keycloak](https://www.keycloak.org)
 
-# How to run it
+## **Enjoy!!!!**
 
-1. Start the `keycloak` container
+## How to run it
+
+### 1. Start the `keycloak` container in its own terminal
 
 ```sh
     make run-oauth2
 ```
 
-2. Create the real, the client and the user
+### 2. Open a new terminal session and run following steps.
 
-3. Edit './run.sh' script to set the right environment variables
+1. Create the realm, the client and the user
 
-4. Run the script
+```sh
+    make create-realm
+```
+
+2. Run the API
 
 ```sh
     make run-api
 ```
+
+### 3. Open the browser and go to [protected endpoin](http://localhost:9000/protected)
+
+When you do it, you'll be redirected to the log in page of the identy manager. Then log in and you'll be redirected to protected endpoint with a valid authentication JWT token.
+
+User credentials to log in:
+
+- user: jarus
+- password: jarus
+
+**That's it !!! :-D**
 
 # What authentication middleware does
 
@@ -77,9 +94,9 @@ sequenceDiagram
     end
 ```
 
-## Pending
+## Used stack
 
-- Extract claims in a known structure ✅
-- What is the redirect url is passed as part of **oauth2.Config** instead of being defined in the client account in the IAM
-- Create a custom JWT from the recived one from IAM ✅
-- Set the TTL of the created cookie
+- Go 1.22.3
+- Keycloack 24.0.1
+- Docker 25.0.3
+- Google Chrome as browser
