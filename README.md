@@ -1,4 +1,4 @@
-# oauth2-example (WIP)
+# oauth2-example
 
 This is a simple example of protecting REST endpoints using an identity manager and OpenID as authentication protocol. As identity manager, I use [Keycloak](https://www.keycloak.org)
 
