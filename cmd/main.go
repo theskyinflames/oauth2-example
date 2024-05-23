@@ -10,13 +10,6 @@ import (
 	httpx "theskyinflames/oauth2-example/pkg/http"
 )
 
-const (
-	dfclientID     = "test-client"
-	dfclientSecret = "EPgv2q0H2fjG1VlHfrVkk5sVQPxLVzOW"
-	dfauthURL      = "http://localhost:8080/realms/test-realm/protocol/openid-connect/auth"
-	dftokenURL     = "http://localhost:8080/realms/test-realm/protocol/openid-connect/token"
-)
-
 func main() {
 	// Parse the needed parameters to set the OAuth2 configuration from environment variables
 	clientID := os.Getenv("CLIENT_ID")

@@ -9,20 +9,33 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// Role represents the role of a user
-type Role string
+type (
+	// Role represents the role of a user
+	Role string
+
+	// Email represents the email of a user
+	Email string
+)
+
+func (e Email) String() string {
+	return string(e)
+}
 
 const rolesClaimKey = "realm_access"
 
 // extractRoles extracts the roles from the JWT token and returns them as a list of strings
-func extractRoles(token *jwt.Token) []Role {
+func extractRoles(token *jwt.Token) (Email, []Role) {
 	// Extract the claims from the token
 	tokenRoles := token.Claims.(jwt.MapClaims)[rolesClaimKey].(map[string]interface{})["roles"].([]interface{})
 	roles := make([]Role, len(tokenRoles))
 	for i, v := range tokenRoles {
 		roles[i] = Role(fmt.Sprintf("%s", v))
 	}
-	return roles
+
+	// Extract the email from the token
+	email := Email(token.Claims.(jwt.MapClaims)["email"].(string))
+
+	return email, roles
 }
 
 // KeyFunc returns a jwt.Keyfunc that can be used to parse the JWT token
@@ -37,7 +50,7 @@ var KeyFunc = func(pk *rsa.PublicKey) jwt.Keyfunc {
 }
 
 // parseJWT parses the JWT token and returns the token if it is valid along with the roles of the user
-func parseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, []Role, error) {
+func parseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, Email, []Role, error) {
 	// Parse the token
 	var (
 		token *jwt.Token
@@ -50,16 +63,16 @@ func parseJWT(receivedToken string, rsaPublicKey []*rsa.PublicKey) (*jwt.Token, 
 		}
 	}
 	if err != nil {
-		return nil, nil, err
+		return nil, "", nil, err
 	}
 
 	if !token.Valid {
-		return nil, nil, fmt.Errorf("token is invalid")
+		return nil, "", nil, fmt.Errorf("token is invalid")
 	}
 
-	roles := extractRoles(token)
+	email, roles := extractRoles(token)
 
-	return token, roles, nil
+	return token, email, roles, nil
 }
 
 var _ jwt.Claims = &CustomToken{}
@@ -74,15 +87,15 @@ type CustomToken struct {
 }
 
 // NewCustomToken creates a new *jwt.Token from the given JWT token
-func NewCustomToken(token *jwt.Token, roles []Role) *jwt.Token {
+func NewCustomToken(token *jwt.Token, email Email, roles []Role) *jwt.Token {
 	expiresAt := time.Unix(int64(token.Claims.(jwt.MapClaims)["exp"].(float64)), 0)
 	fmt.Printf("Expires at: %v\n", expiresAt)
 	return &jwt.Token{
 		Header: token.Header,
 		Claims: &CustomToken{
 			Claims:    token.Claims,
-			Username:  token.Claims.(jwt.MapClaims)["preferred_username"].(string),
-			Email:     token.Claims.(jwt.MapClaims)["email"].(string),
+			Username:  email.String(),
+			Email:     email.String(),
 			Roles:     roles,
 			ExpiresAt: expiresAt,
 		},

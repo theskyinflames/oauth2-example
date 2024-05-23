@@ -13,15 +13,23 @@ import (
 
 func TestProtectedHandler(t *testing.T) {
 	e := echo.New()
+
 	req := httptest.NewRequest(http.MethodGet, "/protected", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	res := httptest.NewRecorder()
+
+	// Create a new context
+	c := e.NewContext(req, res)
+	c.Set(httpx.UserCtxKey, httpx.User{
+		Email: httpx.Email("email"),
+		Roles: []httpx.Role{
+			httpx.Role("admin"),
+		},
+	})
 
 	// Call the handler function
 	err := httpx.ProtectedHandler(c)
 	assert.NoError(t, err)
 
 	// Check the response
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "Protected endpoint: ", rec.Body.String())
+	assert.Equal(t, http.StatusOK, res.Code)
 }

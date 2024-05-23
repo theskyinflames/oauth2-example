@@ -2,17 +2,6 @@
 
 set -e
 
-# Variables
-KEYCLOAK_NEW_REALM="test-realm"
-KEYCLOAK_CONTAINER="keycloak"
-KEYCLOAK_URL="http://localhost:8080"
-KEYCLOAK_REALM="master"
-ADMIN_USERNAME="admin"
-ADMIN_PASSWORD="admin"
-JWKS_URL="http://localhost:8070/realms/test-realm/protocol/openid-connect/certs"
-CLIENT_ID="test-client"
-CLIENT_SECRET="EPgv2q0H2fjG1VlHfrVkk5sVQPxLVzOW"
-
 # Function to run kcadm.sh inside the Docker container
 kcadm() {
     docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kcadm.sh "$@"
@@ -21,6 +10,15 @@ kcadm() {
 kc() {
     docker exec $KEYCLOAK_CONTAINER /opt/keycloak/bin/kc.sh "$@"
 }
+
+# Waiting for Keycloak to start for a maximum of 30 seconds
+echo "Waiting for Keycloak to start, please be patient..."
+for i in {1..30}; do
+    if docker logs $KEYCLOAK_CONTAINER 2>&1 | grep -q "Admin console listening"; then
+        break
+    fi
+    sleep 1
+done
 
 # Check if the Keycloak container is running
 if ! docker ps | grep -q $KEYCLOAK_CONTAINER; then
@@ -49,14 +47,15 @@ echo "Creating confidential client on realm $KEYCLOAK_NEW_REALM..."
 kcadm create clients -r $KEYCLOAK_NEW_REALM \
     -s "clientId=$CLIENT_ID" \
     -s "secret=$CLIENT_SECRET" \
-    -s enabled=true \
-    -s 'redirectUris=["http://localhost:9000/callback"]' \
-    -s 'webOrigins=["http://localhost:9000"]' \
+    -s 'enabled=true' \
+    -s "redirectUris=[\"$REDIRECT_URI\"]" \
+    -s "webOrigins=[\"$WEB_ORIGINS\"]" \
     -s 'publicClient=false' \
     -s 'protocol=openid-connect' \
     -s 'bearerOnly=false' \
     -s 'serviceAccountsEnabled=true' \
-    -s 'authorizationServicesEnabled=true'
+    -s 'authorizationServicesEnabled=true' \
+
 
 
 # Retrieve the client ID

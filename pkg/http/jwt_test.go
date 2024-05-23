@@ -16,14 +16,20 @@ func TestExtractRoles(t *testing.T) {
 			"realm_access": map[string]interface{}{
 				"roles": []interface{}{"admin", "user"},
 			},
+			"email": "jarus@jarus.com",
 		},
 	}
 
-	roles := extractRoles(token)
+	email, roles := extractRoles(token)
 
 	expectedRoles := []Role{"admin", "user"}
 	if !reflect.DeepEqual(roles, expectedRoles) {
 		t.Fatalf("Roles mismatch. Expected: %v, got: %v", expectedRoles, roles)
+	}
+
+	expectedEmail := Email("jarus@jarus.com")
+	if email != expectedEmail {
+		t.Fatalf("Email mismatch. Expected: %v, got: %v", expectedEmail, email)
 	}
 }
 
@@ -41,7 +47,7 @@ func TestParseJWT(t *testing.T) {
 	}
 
 	// Parse the token
-	parsedToken, _, err := parseJWT(tokenString, []*rsa.PublicKey{pubKey})
+	parsedToken, _, _, err := parseJWT(tokenString, []*rsa.PublicKey{pubKey})
 	if err != nil {
 		t.Fatalf("Failed to parse JWT: %v", err)
 	}
