@@ -6,27 +6,13 @@ This is a simple example of protecting REST endpoints using an identity manager 
 
 ## How to run it
 
-### 1. Start the `keycloak` container in its own terminal
+1. Start the identity manager and the API:
 
 ```sh
-    make run-oauth2
+    make run
 ```
 
-### 2. Open a new terminal session and run following steps.
-
-1. Create the realm, the client and the user
-
-```sh
-    make create-realm
-```
-
-2. Run the API
-
-```sh
-    make run-api
-```
-
-### 3. Open the browser and go to [protected endpoin](http://localhost:9000/protected)
+2. Open the browser and go to [protected endpoint](http://localhost:9000/protected)
 
 When you do it, you'll be redirected to the log in page of the identy manager. Then log in and you'll be redirected to protected endpoint with a valid authentication JWT token.
 
@@ -37,7 +23,7 @@ User credentials to log in:
 
 **That's it !!! :-D**
 
-# What authentication middleware does
+## What authentication middleware does
 
 The `http.AuthMiddleware` function in the provided code is a middleware function in Go that is used to check if a user is authenticated before allowing them to access certain routes or resources. Let's break down how it works:
 
@@ -61,7 +47,7 @@ The `http.AuthMiddleware` function in the provided code is a middleware function
 
 In summary, the `AuthMiddleware` function is a middleware that checks if a user is authenticated by verifying the JWT token stored in a cookie. It ensures that only authenticated users with valid tokens and the required roles can access protected routes or resources.
 
-# Auth diagram
+# Authentication process diagram
 
 ```mermaid
 sequenceDiagram
@@ -93,6 +79,10 @@ sequenceDiagram
         API->>WebBrowser: Serve protected content
     end
 ```
+
+## Pending
+
+- Adding logout handler
 
 ## Used stack
 

@@ -13,20 +13,32 @@ import (
 // OAuthConfig is the OAuth2 configuration
 func OAuthConfig(clientID, ClientSecret, authURL, tokenURL string) *oauth2.Config {
 	return &oauth2.Config{
-		ClientID:     "test-client",
-		ClientSecret: "EPgv2q0H2fjG1VlHfrVkk5sVQPxLVzOW",
+		ClientID:     clientID,
+		ClientSecret: ClientSecret,
 		// RedirectURL:  "http://localhost:9000/callback",
 		// Scopes: []string{"openid", "profile", "email"},
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  "http://localhost:8080/realms/test-realm/protocol/openid-connect/auth",
-			TokenURL: "http://localhost:8080/realms/test-realm/protocol/openid-connect/token",
+			AuthURL:  authURL,
+			TokenURL: tokenURL,
 		},
 	}
 }
 
 const (
 	authCookieName = "my-auth-cookie" // Name of the cookie to store the token
+
+	UserCtxKey = "user" // Key to store the user in the context
 )
+
+// User represents a user
+type User struct {
+	Email Email
+	Roles []Role
+}
+
+func (u User) String() string {
+	return fmt.Sprintf("Email: %s, Roles: %#v", u.Email, u.Roles)
+}
 
 // AuthMiddleware is a middleware to check if the user is authenticated
 func AuthMiddleware(rsaPublicKey []*rsa.PublicKey) echo.MiddlewareFunc {
@@ -52,14 +64,14 @@ func AuthMiddleware(rsaPublicKey []*rsa.PublicKey) echo.MiddlewareFunc {
 			}
 
 			// parse the token received in the auth cookie
-			_, roles, err := parseJWT(token, rsaPublicKey)
+			_, email, roles, err := parseJWT(token, rsaPublicKey)
 			if err != nil {
 				c.Logger().Errorf("Failed to parse token: %v", err)
 				return c.Redirect(http.StatusTemporaryRedirect, "/login")
 			}
 
 			// TODO: Check if the user has the required roles to access the resource
-			c.Set("roles", roles)
+			c.Set(UserCtxKey, User{Email: email, Roles: roles})
 
 			// Return the next handler
 			return next(c)
@@ -97,10 +109,10 @@ func CallbackHandler(f OAuthConfigExchangeFunc) echo.HandlerFunc {
 		}
 
 		// Extract the roles from the token
-		roles := extractRoles(accessToken)
+		email, roles := extractRoles(accessToken)
 
 		// Create a new token
-		newToken := NewCustomToken(accessToken, roles)
+		newToken := NewCustomToken(accessToken, email, roles)
 
 		fmt.Printf("New token: %v\n", newToken.Raw)
 
